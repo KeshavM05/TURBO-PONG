@@ -45,6 +45,8 @@ public class GamePanel extends JPanel implements Runnable
         random = new Random();
         //ball = new Ball((GAME_WIDTH/2) - (BALL_DIAMETER/2), (GAME_HEIGHT/2) - (BALL_DIAMETER/2), BALL_DIAMETER, BALL_DIAMETER);
         ball = new Ball((GAME_WIDTH/2) - (BALL_DIAMETER/2), random.nextInt(GAME_HEIGHT - BALL_DIAMETER), BALL_DIAMETER, BALL_DIAMETER);
+        AI_target = setAITarget();
+
     }
 
     public void newPaddles()
@@ -67,12 +69,8 @@ public class GamePanel extends JPanel implements Runnable
         paddle2.draw(g);
         ball.draw(g);
         score.draw(g);
-        g.setColor(Color.red);
-        g.fillOval(PADDLE_WIDTH+BALL_DIAMETER/2,(int)AI_target,5,5);
-        g.setColor(Color.orange);
-        g.drawOval(PADDLE_WIDTH+BALL_DIAMETER/2,(int)Alt_AI_target,6,6);
-        g.setColor(Color.blue);
-        g.fillOval((int)x_intercept,(int)x_int_y,5,5);
+        //g.setColor(Color.red);
+        //g.fillOval(PADDLE_WIDTH+BALL_DIAMETER/2,(int)AI_target,5,5);
     }
 
     public void move()
@@ -83,9 +81,36 @@ public class GamePanel extends JPanel implements Runnable
         ball.move();
     }
 
-    private double AI_target,Alt_AI_target;
+    private double AI_target, ALT_target;
     private boolean AI_set=false;
-    private double x_intercept,x_int_y;
+     private double setAITarget()
+    {
+        double x=ball.x;
+        double y=ball.y;
+        double dx=ball.xVelocity;
+        double dy=ball.yVelocity;
+        while (x>0)
+        {
+            if (dy<0)
+            {
+                x-=Math.abs(y/dy*dx);
+                y=0;
+                dy=-dy;
+            } else {
+                x-=Math.abs((GAME_HEIGHT-y)/dy*dx);
+                y=GAME_HEIGHT;
+                dy=-dy;
+            }
+        }
+        if (dy<0)
+        {
+            y=GAME_HEIGHT+x/dx*dy;
+        } else {
+            y=x/dx*dy;
+        }
+        return y;
+    }
+    
     public void EnableAI()
     {
         //if(ball.xVelocity < GAME_WIDTH / 2 && ball.yVelocity < (GAME_HEIGHT/2) - (PADDLE_HEIGHT/2))
@@ -93,37 +118,7 @@ public class GamePanel extends JPanel implements Runnable
 
         if (!AI_set)
         {
-            double HEIGHT=GAME_HEIGHT-BALL_DIAMETER;
-            if (ball.yVelocity<0)
-            {
-                x_intercept=ball.x-ball.y/ball.yVelocity*ball.xVelocity;
-                x_int_y = BALL_DIAMETER/2;
-            } else {
-                x_intercept=ball.x+(HEIGHT-ball.y)/ball.yVelocity*ball.xVelocity;
-                x_int_y = GAME_HEIGHT-BALL_DIAMETER/2;
-            }
-            
-            double time=(x_intercept-PADDLE_WIDTH-BALL_DIAMETER/2)/ball.xVelocity;
-            int reflects = (int)Math.floor(Math.abs(ball.yVelocity*time / HEIGHT))+1;
-            if ((reflects%2)==0)
-            {
-                AI_target=ball.y-ball.yVelocity*time;
-                Alt_AI_target=HEIGHT-ball.y-ball.yVelocity*time;
-            }
-            else
-            {
-                AI_target=HEIGHT-ball.y+ball.yVelocity*time;
-                Alt_AI_target=ball.y-ball.yVelocity*time;
-            }
-            AI_target=(AI_target+HEIGHT*100)%HEIGHT;
-            Alt_AI_target=(Alt_AI_target+HEIGHT*100)%HEIGHT;
-            if (ball.xVelocity<0)
-            {
-                System.out.print("Reflects:"+reflects);
-                System.out.print("      H:"+HEIGHT);
-                System.out.print("      targ:"+AI_target);
-                System.out.println("      alt:"+Alt_AI_target);
-            }   
+            AI_target = setAITarget();
             AI_set=true;
         }
 
@@ -132,7 +127,7 @@ public class GamePanel extends JPanel implements Runnable
         {
             AI_set=false;
             AI_target=GAME_HEIGHT/2;
-            Alt_AI_target=GAME_HEIGHT/2;
+
         }
         if (paddle1.y == AI_target-PADDLE_HEIGHT/2)
         {
@@ -140,11 +135,11 @@ public class GamePanel extends JPanel implements Runnable
         }
         else if(paddle1.y < AI_target-PADDLE_HEIGHT/2)
         {
-            AIlocation = 2;
+            AIlocation = 3;
         }
         else 
         {
-            AIlocation = -2;
+            AIlocation = -3;
         }
 
         //if (AIlocation > 0)
@@ -197,13 +192,13 @@ public class GamePanel extends JPanel implements Runnable
             //ball.xVelocity++; // optional for more difficulty
             if(ball.yVelocity > 0)
             {
-            //    ball.yVelocity = ball.yVelocity*Math.sin(bounceAngle);
+                //    ball.yVelocity = ball.yVelocity*Math.sin(bounceAngle);
 
                 ball.yVelocity ++ ; // optional for more difficulty
             }
             else
             {                
-            //    ball.yVelocity = ball.yVelocity*-Math.sin(bounceAngle);
+                //    ball.yVelocity = ball.yVelocity*-Math.sin(bounceAngle);
 
                 ball.yVelocity --; // optional for more difficulty
             }
@@ -231,7 +226,7 @@ public class GamePanel extends JPanel implements Runnable
         if (ball.y <= 0)
         {
             ball.setYDirection(-ball.yVelocity);
-            
+
         }
         if (ball.y >= (GAME_HEIGHT - BALL_DIAMETER))
         {
@@ -275,7 +270,7 @@ public class GamePanel extends JPanel implements Runnable
             if(delta >= 1)
             {
                 move();
-                if(AI)
+                if(AI)// && ball.x < GAME_WIDTH/2)
                 {
                     EnableAI();
                 }
