@@ -12,4 +12,3 @@ public class PongGame extends JFrame
         GameFrame frame = new GameFrame();
     }
 }
-    

@@ -8,8 +8,8 @@ public class Ball extends Rectangle
 {
     
     Random random;
-    int xVelocity;
-    int yVelocity;
+    double xVelocity;
+    double yVelocity;
     int initialSpeed = 3;
     
     
@@ -39,12 +39,12 @@ public class Ball extends Rectangle
                
     }
 
-    public void setXDirection(int randomXDirection)
+    public void setXDirection(double randomXDirection)
     {
         xVelocity = randomXDirection;
     }
     
-    public void setYDirection(int randomYDirection)
+    public void setYDirection(double randomYDirection)
     {
         yVelocity = randomYDirection;
     }

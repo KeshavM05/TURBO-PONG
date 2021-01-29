@@ -22,8 +22,9 @@ public class GamePanel extends JPanel implements Runnable
     Paddle paddle2;
     Ball ball;
     Score score;
+    public boolean AI;
     
-    public GamePanel()
+    public GamePanel(boolean AVP)
     {
         newPaddles();
         newBall();
@@ -32,6 +33,8 @@ public class GamePanel extends JPanel implements Runnable
         this.setFocusable(true);
         this.addKeyListener(new AL());
         this.setPreferredSize(SCREEN_SIZE);
+        
+        AI = AVP;
         
         gameThread = new Thread(this);
         gameThread.start();
@@ -46,8 +49,8 @@ public class GamePanel extends JPanel implements Runnable
     
     public void newPaddles()
     {
-        paddle1 = new Paddle(0, (GAME_HEIGHT/2) - (PADDLE_HEIGHT/2), PADDLE_WIDTH, PADDLE_HEIGHT, 1);
-        paddle2 = new Paddle(GAME_WIDTH - PADDLE_WIDTH, (GAME_HEIGHT/2) - (PADDLE_HEIGHT/2), PADDLE_WIDTH, PADDLE_HEIGHT, 2);
+        paddle1 = new Paddle(0, (GAME_HEIGHT/2) - (PADDLE_HEIGHT/2), PADDLE_WIDTH, PADDLE_HEIGHT, 1, AI);
+        paddle2 = new Paddle(GAME_WIDTH - PADDLE_WIDTH, (GAME_HEIGHT/2) - (PADDLE_HEIGHT/2), PADDLE_WIDTH, PADDLE_HEIGHT, 2, AI);
     }
     
     public void paint(Graphics g)
@@ -71,6 +74,20 @@ public class GamePanel extends JPanel implements Runnable
         paddle1.move();
         paddle2.move();
         ball.move();
+    }
+    
+    public void EnableAI()
+    {
+        //if(ball.xVelocity < GAME_WIDTH / 2 && ball.yVelocity < (GAME_HEIGHT/2) - (PADDLE_HEIGHT/2))
+        //{
+        
+        double AIlocation = ball.yVelocity;
+        //if (AIlocation > 0)
+        //    AIlocation = 3;
+        //else if (AIlocation < 0)
+        //    AIlocation = -3;
+        paddle1.setYDirection(AIlocation);
+        //}
     }
     
     public void checkCollision()
@@ -102,11 +119,11 @@ public class GamePanel extends JPanel implements Runnable
             ball.xVelocity++; // optional for more difficulty
             if(ball.yVelocity > 0)
             {
-                ball.yVelocity++; // optional for more difficulty
+                ball.yVelocity ++ ; // optional for more difficulty
             }
             else
-            {
-                ball.yVelocity--; // optional for more difficulty
+            {                
+                ball.yVelocity --; // optional for more difficulty
             }
             ball.setXDirection(ball.xVelocity);
             ball.setYDirection(ball.yVelocity);
@@ -118,11 +135,11 @@ public class GamePanel extends JPanel implements Runnable
             ball.xVelocity++; // optional for more difficulty
             if(ball.yVelocity > 0)
             {
-                ball.yVelocity++; // optional for more difficulty
+                ball.yVelocity ++ ; // optional for more difficulty
             }
             else
-            {
-                ball.yVelocity--; // optional for more difficulty
+            {                
+                ball.yVelocity --; // optional for more difficulty
             }
             ball.setXDirection(-ball.xVelocity);
             ball.setYDirection(ball.yVelocity);
@@ -170,6 +187,11 @@ public class GamePanel extends JPanel implements Runnable
             if(delta >= 1)
             {
                 move();
+                if(AI && ball.x < GAME_WIDTH / 2)
+                {
+                    EnableAI();
+                }
+                
                 checkCollision();
                 repaint();
                 delta--;                
