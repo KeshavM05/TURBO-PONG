@@ -10,9 +10,10 @@ public class Paddle extends Rectangle
     int id;
     double yVelocity;
     int speed = 10;
-    boolean lock;
+    boolean lockLeft;
+    boolean lockRight;
     
-    public Paddle(int x, int y, int PADDLE_WIDTH, int PADDLE_HEIGHT, int id, boolean AI)
+    public Paddle(int x, int y, int PADDLE_WIDTH, int PADDLE_HEIGHT, int id, boolean LeftAI, boolean RightAI)
     {        
         /** Ball is a subclass of the rectangle superclass
          * (Which is the reason) Ball extends Rectangle
@@ -23,7 +24,8 @@ public class Paddle extends Rectangle
         super(x,y,PADDLE_WIDTH, PADDLE_HEIGHT);
         this.id = id;
         
-        lock = AI;
+        lockLeft = LeftAI;
+        lockRight = RightAI;
     }
 
     public void keyPressed(KeyEvent e)
@@ -34,9 +36,8 @@ public class Paddle extends Rectangle
             case 1:
                 if(e.getKeyCode() == KeyEvent.VK_W)
                 {
-                    if (lock == true)
-                    {                    
-                       
+                    if (lockLeft == true)
+                    {
                         return;
                     }       
                     
@@ -45,7 +46,7 @@ public class Paddle extends Rectangle
                 }
                 if(e.getKeyCode() == KeyEvent.VK_S)
                 {
-                    if (lock == true)
+                    if (lockLeft == true)
                     {                                               
                         return;
                     }
@@ -58,11 +59,21 @@ public class Paddle extends Rectangle
             case 2:
                 if(e.getKeyCode() == KeyEvent.VK_UP)
                 {
+                    if (lockRight == true)
+                    {
+                        return;
+                    }
+                    
                     setYDirection(-speed);
                     move();
                 }
                 if(e.getKeyCode() == KeyEvent.VK_DOWN)
                 {
+                    if (lockRight == true)
+                    {
+                        return;
+                    }
+                    
                     setYDirection(speed);
                     move();
                 }
@@ -79,7 +90,7 @@ public class Paddle extends Rectangle
             case 1:
                 if(e.getKeyCode() == KeyEvent.VK_W)
                 {
-                    if (lock == true)
+                    if (lockLeft == true)
                     {
                         return;
                     }
@@ -89,7 +100,7 @@ public class Paddle extends Rectangle
                 }
                 if(e.getKeyCode() == KeyEvent.VK_S)
                 {
-                    if (lock == true)
+                    if (lockLeft == true)
                     {
                         return;
                     }
@@ -101,12 +112,22 @@ public class Paddle extends Rectangle
                 
             case 2:
                 if(e.getKeyCode() == KeyEvent.VK_UP)
-                {
+                {                    
+                    if (lockRight == true)
+                    {
+                        return;
+                    }
+                    
                     setYDirection(0);
                     move();
                 }
                 if(e.getKeyCode() == KeyEvent.VK_DOWN)
                 {
+                    if (lockRight == true)
+                    {
+                        return;
+                    }
+                    
                     setYDirection(0);
                     move();
                 }

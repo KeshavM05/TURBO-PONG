@@ -1,3 +1,4 @@
+
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -8,7 +9,7 @@ public class GamePanel extends JPanel implements Runnable
 {
 
     static final int GAME_WIDTH = 1000;
-    static final int GAME_HEIGHT = (int)(GAME_WIDTH * (0.5555));      
+    static final int GAME_HEIGHT = (int)(GAME_WIDTH * (0.5555));
     static final Dimension SCREEN_SIZE = new Dimension(GAME_WIDTH, GAME_HEIGHT);  
     static final int BALL_DIAMETER = 20;
     static final int PADDLE_WIDTH = 25;
@@ -22,22 +23,28 @@ public class GamePanel extends JPanel implements Runnable
     Paddle paddle2;
     Ball ball;
     Score score;
-    public boolean AI;
+    public boolean LeftAI;
+    public boolean RightAI;
+    public int WinScore;
 
-    public GamePanel(boolean AVP)
+    public GamePanel(boolean leftAI, boolean rightAI, int winScore)
     {
         newPaddles();
         newBall();
         score = new Score(GAME_WIDTH, GAME_HEIGHT);
         //N
         this.setFocusable(true);
+        //N
         this.addKeyListener(new AL());
         this.setPreferredSize(SCREEN_SIZE);
 
-        AI = AVP;
-
+        LeftAI = leftAI;
+        RightAI = rightAI;
+        WinScore = winScore;
+        
         gameThread = new Thread(this);
         gameThread.start();
+        
     }
 
     public void newBall()
@@ -45,14 +52,15 @@ public class GamePanel extends JPanel implements Runnable
         random = new Random();
         //ball = new Ball((GAME_WIDTH/2) - (BALL_DIAMETER/2), (GAME_HEIGHT/2) - (BALL_DIAMETER/2), BALL_DIAMETER, BALL_DIAMETER);
         ball = new Ball((GAME_WIDTH/2) - (BALL_DIAMETER/2), random.nextInt(GAME_HEIGHT - BALL_DIAMETER), BALL_DIAMETER, BALL_DIAMETER);
-        AI_target = setAITarget();
+        LeftAI_target = setLeftAITarget();
+        //RightAI_target = setRightAITarget();
 
     }
 
     public void newPaddles()
     {
-        paddle1 = new Paddle(0, (GAME_HEIGHT/2) - (PADDLE_HEIGHT/2), PADDLE_WIDTH, PADDLE_HEIGHT, 1, AI);
-        paddle2 = new Paddle(GAME_WIDTH - PADDLE_WIDTH, (GAME_HEIGHT/2) - (PADDLE_HEIGHT/2), PADDLE_WIDTH, PADDLE_HEIGHT, 2, AI);
+        paddle1 = new Paddle(0, (GAME_HEIGHT/2) - (PADDLE_HEIGHT/2), PADDLE_WIDTH, PADDLE_HEIGHT, 1, LeftAI, RightAI);
+        paddle2 = new Paddle(GAME_WIDTH - PADDLE_WIDTH, (GAME_HEIGHT/2) - (PADDLE_HEIGHT/2), PADDLE_WIDTH, PADDLE_HEIGHT, 2, LeftAI, RightAI);
     }
 
     public void paint(Graphics g)
@@ -61,6 +69,7 @@ public class GamePanel extends JPanel implements Runnable
         graphics = image.getGraphics();
         draw(graphics);
         g.drawImage(image,0,0,this);
+        
     }
 
     public void draw(Graphics g)
@@ -71,19 +80,25 @@ public class GamePanel extends JPanel implements Runnable
         score.draw(g);
         //g.setColor(Color.red);
         //g.fillOval(PADDLE_WIDTH+BALL_DIAMETER/2,(int)AI_target,5,5);
+        
     }
 
     public void move()
     {
         paddle1.move();
+        //paddle2.y=ball.y-PADDLE_HEIGHT/2;
         paddle2.move();
-        paddle2.y=ball.y;
+        if(RightAI)
+        {
+            paddle2.y=ball.y-PADDLE_HEIGHT/2;
+        }
         ball.move();
+        
     }
 
-    private double AI_target, ALT_target;
-    private boolean AI_set=false;
-     private double setAITarget()
+    private double LeftAI_target;
+    private boolean LeftAI_set=false;
+    private double setLeftAITarget()
     {
         double x=ball.x;
         double y=ball.y;
@@ -111,46 +126,118 @@ public class GamePanel extends JPanel implements Runnable
         return y;
     }
     
-    public void EnableAI()
+    public void EnableLeftAI()
     {
         //if(ball.xVelocity < GAME_WIDTH / 2 && ball.yVelocity < (GAME_HEIGHT/2) - (PADDLE_HEIGHT/2))
         //{
 
-        if (!AI_set)
+        if (!LeftAI_set)
         {
-            AI_target = setAITarget();
-            AI_set=true;
+            LeftAI_target = setLeftAITarget();
+            LeftAI_set=true;
         }
 
-        double AIlocation = 0;
+        double LeftAIlocation = 0;
         if(ball.xVelocity > 0)
         {
-            AI_set=false;
-            AI_target=GAME_HEIGHT/2;
+            LeftAI_set=false;
+            LeftAI_target=GAME_HEIGHT/2;
 
         }
-        if (paddle1.y == AI_target-PADDLE_HEIGHT/2)
+        if (paddle1.y == LeftAI_target-PADDLE_HEIGHT/2)
         {
-            AIlocation = 0;
+            LeftAIlocation = 0;
         }
-        else if(paddle1.y < AI_target-PADDLE_HEIGHT/2)
+        else if(paddle1.y < LeftAI_target-PADDLE_HEIGHT/2)
         {
-            AIlocation = 3;
+            LeftAIlocation = 3;
         }
         else 
         {
-            AIlocation = -3;
+            LeftAIlocation = -3;
         }
 
         //if (AIlocation > 0)
         //    AIlocation = 3;
         //else if (AIlocation < 0)
         //    AIlocation = -3;
-        paddle1.setYDirection(AIlocation);
+        paddle1.setYDirection(LeftAIlocation);
         //System.out.println(paddle1.y);
         //}
     }
 
+    
+    //private double RightAI_target;
+    //private boolean RightAI_set=false;
+    //private double setRightAITarget()
+    //{
+    //    double x=ball.x;
+    //    double y=ball.y;
+    //    double dx=ball.xVelocity;
+    //    double dy=ball.yVelocity;
+    //    while (x>0)
+    //    {
+    //        if (dy<0)
+    //        {
+    //            x-=Math.abs(y/dy*dx);
+    //            y=0;
+    //            dy=-dy;
+    //        } else {
+    //            x-=Math.abs((GAME_HEIGHT-y)/dy*dx);
+    //            y=GAME_HEIGHT;
+    //            dy=-dy;
+    //        }
+    //    }
+    //    if (dy<0)
+    //    {
+    //        y=GAME_HEIGHT+x/dx*dy;
+    //    } else {
+    //        y=x/dx*dy;
+    //    }
+    //    return y;
+    //}
+    
+    public void EnableRightAI()
+    {
+        //if(ball.xVelocity < GAME_WIDTH / 2 && ball.yVelocity < (GAME_HEIGHT/2) - (PADDLE_HEIGHT/2))
+        //{
+    
+        //if (!RightAI_set)
+        //{
+        //    RightAI_target = setRightAITarget();
+        //    RightAI_set=true;
+        //}
+       
+        double RightAI_target = ball.y;
+        double RightAIlocation = 0;
+        if(ball.xVelocity < 0)
+        {
+            //RightAI_set=false;
+            RightAI_target=GAME_HEIGHT/2;
+    
+        }
+        if (paddle2.y == RightAI_target-PADDLE_HEIGHT/2)
+        {
+            RightAIlocation = 0;
+        }
+        else if(paddle2.y < RightAI_target-PADDLE_HEIGHT/2 && ball.x > GAME_WIDTH/2)
+        {
+            RightAIlocation = 15;
+        }
+        else if(paddle2.y > RightAI_target-PADDLE_HEIGHT/2 && ball.x > GAME_WIDTH/2)
+        {
+            RightAIlocation = -15;
+        }
+    
+        //if (AIlocation > 0)
+        //    AIlocation = 3;
+        //else if (AIlocation < 0)
+        //    AIlocation = -3;
+        paddle2.setYDirection(RightAIlocation);
+        //System.out.println(paddle2.y);
+        //}
+    }
+    
     public void checkCollision()
     {
         // To prevent paddles from going beyond the window
@@ -174,39 +261,26 @@ public class GamePanel extends JPanel implements Runnable
         }
 
         // To check for paddles and ball collision
-        if(ball.intersects(paddle1) && ball.xVelocity<0)
+        
+        // To check for paddles and ball collision
+        //if(ball.intersects(paddle1) && ball.xVelocity<0)
+        if(ball.intersects(paddle1))
         {
-            //double relativeIntersectY = (paddle1.y+(PADDLE_HEIGHT/2)) - ball.y;
-
-            //double normalizedRelativeIntersectionY = (relativeIntersectY/(PADDLE_HEIGHT/2));
-            //double bounceAngle = normalizedRelativeIntersectionY;// * 90;
-
-            //ball.xVelocity = ball.xVelocity*Math.cos(bounceAngle);
-            //ball.yVelocity = ball.yVelocity*-Math.sin(bounceAngle);
-
-            //double angle = (ball.y - paddle1.y+(PADDLE_HEIGHT/2)) / PADDLE_HEIGHT * 0.5236 + Math.PI/2;
-
-            //ball.xVelocity = -(ball.xVelocity) * ball.yVelocity * Math.sin(angle);
-            //ball.yVelocity = ball.yVelocity * Math.cos(angle);
-            //ball.xVelocity = Math.abs(ball.xVelocity);
-            //ball.xVelocity++; // optional for more difficulty
+            ball.xVelocity = Math.abs(ball.xVelocity);
+            ball.xVelocity++; // optional for more difficulty
             if(ball.yVelocity > 0)
             {
-                //    ball.yVelocity = ball.yVelocity*Math.sin(bounceAngle);
-
                 ball.yVelocity ++ ; // optional for more difficulty
             }
             else
             {                
-                //    ball.yVelocity = ball.yVelocity*-Math.sin(bounceAngle);
-
                 ball.yVelocity --; // optional for more difficulty
             }
-            ball.setXDirection(-ball.xVelocity);
+            ball.setXDirection(ball.xVelocity);
             ball.setYDirection(ball.yVelocity);
         }
-
-        if(ball.intersects(paddle2) && ball.xVelocity>0)
+        //if(ball.intersects(paddle2) && ball.xVelocity>0)
+        if(ball.intersects(paddle2))
         {
             ball.xVelocity = Math.abs(ball.xVelocity);
             ball.xVelocity++; // optional for more difficulty
@@ -221,6 +295,7 @@ public class GamePanel extends JPanel implements Runnable
             ball.setXDirection(-ball.xVelocity);
             ball.setYDirection(ball.yVelocity);
         }
+        
 
         // To prevent ball from going beyond the top and bottom part of the window        
         if (ball.y <= 0)
@@ -245,6 +320,13 @@ public class GamePanel extends JPanel implements Runnable
             newPaddles();
             newBall();
             //System.out.println("Player 2: " + score.player2);
+            
+            if (score.player2 >= WinScore)
+            {
+                repaint();
+                JOptionPane.showMessageDialog(null, "Player 2 Wins by " + (score.player2 - score.player1) + " points!");
+                System.exit(1);
+            }
         }
         if (ball.x >= (GAME_WIDTH - BALL_DIAMETER))
         {
@@ -252,6 +334,13 @@ public class GamePanel extends JPanel implements Runnable
             newPaddles();
             newBall();
             //System.out.println("Player 1: " + score.player1);
+            
+            if (score.player1 >= WinScore)
+            {
+                repaint();
+                JOptionPane.showMessageDialog(null, "Player 1 Wins by " + (score.player1 - score.player2) + " points!");
+                System.exit(1);
+            }
         }
     }
 
@@ -270,10 +359,16 @@ public class GamePanel extends JPanel implements Runnable
             if(delta >= 1)
             {
                 move();
-                if(AI)// && ball.x < GAME_WIDTH/2)
+                if(LeftAI)// && ball.x < GAME_WIDTH/2)
                 {
-                    EnableAI();
+                    EnableLeftAI();
+                    //EnableRightAI();
                 }
+                //if(RightAI)// && ball.x > GAME_WIDTH/2)
+                //{
+                    //EnableLeftAI();
+                //    EnableRightAI();
+                //}
 
                 checkCollision();
                 repaint();
