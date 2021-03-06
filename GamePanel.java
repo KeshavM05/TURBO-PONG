@@ -14,6 +14,9 @@ public class GamePanel extends JPanel implements Runnable
     static final int BALL_DIAMETER = 20;
     static final int PADDLE_WIDTH = 25;
     static final int PADDLE_HEIGHT = 100;
+    
+    static final int VSHUMAN = 4;
+    static final int VSAI = 10;
 
     Thread gameThread;
     Image image;
@@ -150,11 +153,25 @@ public class GamePanel extends JPanel implements Runnable
         }
         else if(paddle1.y < LeftAI_target-PADDLE_HEIGHT/2)
         {
-            LeftAIlocation = 3;
+            if (!RightAI)
+            {
+                LeftAIlocation = VSHUMAN;
+            }
+            else
+            {
+                LeftAIlocation = VSAI;
+            }
         }
         else 
         {
-            LeftAIlocation = -3;
+            if (!RightAI)
+            {
+                LeftAIlocation = -VSHUMAN;
+            }
+            else
+            {
+                LeftAIlocation = -VSAI;
+            }
         }
 
         //if (AIlocation > 0)
